@@ -19,56 +19,75 @@ public final class TetrisPiece implements Piece {
      * You may freely add additional constructors, but please leave this one - it is used both in
      * the runner code and testing code.
      */
+    private PieceType type;
+    private int rotationIndex;
+    private Point[] body;
+    private int[] skirt;
+    private int width;
+    private int height;
+
+
     public TetrisPiece(PieceType type) {
         // TODO: Implement me.
+        this.type = type;
+        this.body = type.getSpawnBody();
+        System.out.println(body);
+    }
+
+    private TetrisPiece(PieceType type, int rotationIndex) {
+        this.type = type;
+        this.rotationIndex = rotationIndex;
     }
 
     @Override
     public PieceType getType() {
         // TODO: Implement me.
-        return null;
+        return type;
     }
 
     @Override
     public int getRotationIndex() {
         // TODO: Implement me.
-        return -1;
+        return rotationIndex;
     }
 
     @Override
     public Piece clockwisePiece() {
         // TODO: Implement me.
-        return null;
+        int newRotationIndex = (rotationIndex + 1) % 4;
+        return new TetrisPiece(type, newRotationIndex);
     }
 
     @Override
     public Piece counterclockwisePiece() {
         // TODO: Implement me.
-        return null;
+        int newRotationIndex = rotationIndex - 1;
+        if (newRotationIndex < 0) newRotationIndex = 3;
+        return new TetrisPiece(type, newRotationIndex);
     }
 
     @Override
     public int getWidth() {
         // TODO: Implement me.
-        return -1;
+        return width;
     }
 
     @Override
     public int getHeight() {
         // TODO: Implement me.
-        return -1;
+        return height;
     }
 
     @Override
     public Point[] getBody() {
         // TODO: Implement me.
-        return null;
+        return body;
     }
 
     @Override
     public int[] getSkirt() {
         // TODO: Implement me.
-        return null;
+        return skirt;
     }
 
     @Override
@@ -78,6 +97,7 @@ public final class TetrisPiece implements Piece {
         TetrisPiece otherPiece = (TetrisPiece) other;
 
         // TODO: Implement me.
+
         return false;
     }
 }
