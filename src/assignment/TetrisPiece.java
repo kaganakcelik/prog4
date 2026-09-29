@@ -15,13 +15,15 @@ public final class TetrisPiece implements Piece {
     /**
      * Construct a tetris piece of the given type. The piece should be in it's spawn orientation,
      * i.e., a rotation index of 0.
-     * 
+     * <p>
      * You may freely add additional constructors, but please leave this one - it is used both in
      * the runner code and testing code.
      */
+
+    private final int NUMPOINTS = 4;
     private PieceType type;
     private int rotationIndex;
-    private Point[] body;
+    private Point[] body = new Point[4];
     private int[] skirt;
     private int width;
     private int height;
@@ -37,6 +39,21 @@ public final class TetrisPiece implements Piece {
     private TetrisPiece(PieceType type, int rotationIndex) {
         this.type = type;
         this.rotationIndex = rotationIndex;
+        for (int i = 0; i < rotationIndex; i++) {
+            for (int j = 0; j < NUMPOINTS; j++) {
+                int spawnX = type.getSpawnBody()[i].x;
+                int spawnY = type.getSpawnBody()[i].y;
+                int boxHeight = type.getBoundingBox().height;
+                body[i] = new Point(spawnY, (boxHeight - 1) - spawnX);
+            }
+        }
+        this.skirt = findSkirt();
+        //what is n in O(n) because everything should be in constant time
+        //how should we generate all rotations of a type?
+        //what is width and height here
+        //this.width =
+        //this.height =
+
     }
 
     @Override
@@ -93,11 +110,26 @@ public final class TetrisPiece implements Piece {
     @Override
     public boolean equals(Object other) {
         // Ignore objects which aren't also tetris pieces.
-        if(!(other instanceof TetrisPiece)) return false;
+        if (!(other instanceof TetrisPiece)) return false;
         TetrisPiece otherPiece = (TetrisPiece) other;
 
         // TODO: Implement me.
 
         return false;
     }
+
+
+    private int[] findSkirt() {
+        int[] newSkirt = new int[type.getBoundingBox().width];
+        for (int i = 0; i < newSkirt.length; i++) {
+            newSkirt[i] = Integer.MAX_VALUE;
+        }
+        for (int i = 0; i < NUMPOINTS; i++) {
+            int x = body[i].x;
+            int minSkirt = body[i].y;
+            newSkirt[x] = Math.min(newSkirt[x], minSkirt);
+        }
+        return newSkirt;
+    }
 }
+
