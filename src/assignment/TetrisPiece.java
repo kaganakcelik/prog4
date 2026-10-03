@@ -21,104 +21,110 @@ public final class TetrisPiece implements Piece {
      */
 
     private final int NUMPOINTS = 4;
+    private final int NUMROTATIONS = 4;
+
     private PieceType type;
     private int rotationIndex;
-    private Point[] body = new Point[4];
+    private Point[] body;
     private int[] skirt;
     private int width;
     private int height;
 
+    private TetrisPiece clockwise;
+    private TetrisPiece counterClockwise;
 
     public TetrisPiece(PieceType type) {
-        // TODO: Implement me.
-        this.type = type;
-        this.body = type.getSpawnBody();
-        System.out.println(body);
+        // make this piece rotation 0 using type's spawn shape
+        this(type, 0, type.getSpawnBody());
+
+        // go around the circular linked-list ring clockwise and and and call build
+        Piece current = this;
+        for (int i = 0; i < NUMROTATIONS; i++) {
+            current = current.clockwisePiece();
+        }
     }
 
-    private TetrisPiece(PieceType type, int rotationIndex) {
+    // builds a single rotation from a body that's already been rotated
+    private TetrisPiece(PieceType type, int rotationIndex, Point[] body) {
         this.type = type;
         this.rotationIndex = rotationIndex;
-        for (int i = 0; i < rotationIndex; i++) {
-            for (int j = 0; j < NUMPOINTS; j++) {
-                int spawnX = type.getSpawnBody()[i].x;
-                int spawnY = type.getSpawnBody()[i].y;
-                int boxHeight = type.getBoundingBox().height;
-                body[i] = new Point(spawnY, (boxHeight - 1) - spawnX);
-            }
-        }
-        this.skirt = findSkirt();
-        //what is n in O(n) because everything should be in constant time
-        //how should we generate all rotations of a type?
-        //what is width and height here
-        //this.width =
-        //this.height =
+        this.width = type.getBoundingBox().width;
+        this.height = type.getBoundingBox().height;
+        this.body = new Point[NUMPOINTS];
 
+        for (int i = 0; i < NUMPOINTS; i++) {
+            this.body[i] = new Point(body[i].x, body[i].y);
+        }
+
+        this.skirt = findSkirt();
     }
 
     @Override
     public PieceType getType() {
-        // TODO: Implement me.
         return type;
     }
 
     @Override
     public int getRotationIndex() {
-        // TODO: Implement me.
         return rotationIndex;
     }
 
+
+    // returns this piece rotated 90 degrees clockwise
     @Override
     public Piece clockwisePiece() {
-        // TODO: Implement me.
-        int newRotationIndex = (rotationIndex + 1) % 4;
-        return new TetrisPiece(type, newRotationIndex);
+        if (clockwise == null) {
+            if (rotationIndex == NUMROTATIONS - 1) {
+                clockwise = counterClockwise.counterClockwise.counterClockwise;
+            } else {
+                Point[] rotated = new Point[NUMPOINTS];
+                for (int i = 0; i < NUMPOINTS; i++) {
+                    rotated[i] = new Point(body[i].y, (width - 1) - body[i].x);
+                }
+                clockwise = new TetrisPiece(type, rotationIndex + 1, rotated);
+            }
+            clockwise.counterClockwise = this;
+        }
+        return clockwise;
     }
 
+    // returns this piece rotated 90 degrees counterclockwise (already computed in the clockwisePiece method)
     @Override
     public Piece counterclockwisePiece() {
-        // TODO: Implement me.
-        int newRotationIndex = rotationIndex - 1;
-        if (newRotationIndex < 0) newRotationIndex = 3;
-        return new TetrisPiece(type, newRotationIndex);
+        return counterClockwise;
     }
 
     @Override
     public int getWidth() {
-        // TODO: Implement me.
         return width;
     }
 
     @Override
     public int getHeight() {
-        // TODO: Implement me.
         return height;
     }
 
     @Override
     public Point[] getBody() {
-        // TODO: Implement me.
         return body;
     }
 
     @Override
     public int[] getSkirt() {
-        // TODO: Implement me.
         return skirt;
     }
 
+    // two pieces are equal when they're the same type and rotation
     @Override
     public boolean equals(Object other) {
         // Ignore objects which aren't also tetris pieces.
         if (!(other instanceof TetrisPiece)) return false;
         TetrisPiece otherPiece = (TetrisPiece) other;
 
-        // TODO: Implement me.
-
-        return false;
+        return type == otherPiece.type && rotationIndex == otherPiece.rotationIndex;
     }
 
-
+    // computes the skirt
     private int[] findSkirt() {
         int[] newSkirt = new int[type.getBoundingBox().width];
         for (int i = 0; i < newSkirt.length; i++) {
