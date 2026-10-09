@@ -1,5 +1,6 @@
 package assignment;
 
+import javax.swing.text.Position;
 import java.awt.*;
 
 /**
@@ -9,11 +10,27 @@ import java.awt.*;
  */
 public final class TetrisBoard implements Board {
 
+    int width, height;
+    Piece.PieceType[][] board;
+
+    TetrisPiece currentPiece;
+    Point currentPosition;
+
+
     // JTetris will use this constructor
-    public TetrisBoard(int width, int height) {}
+    public TetrisBoard(int width, int height) {
+        this.width = width;
+        this.height = height;
+        board = new Piece.PieceType[height][width];
+    }
 
     @Override
-    public Result move(Action act) { return Result.NO_PIECE; }
+    public Result move(Action act) {
+        Point newPosition = new Point(currentPosition.x, currentPosition.y-1);
+        setPosition(currentPiece, newPosition);
+
+        return Result.SUCCESS;
+    }
 
     @Override
     public Board testMove(Action act) { return null; }
@@ -25,7 +42,11 @@ public final class TetrisBoard implements Board {
     public Point getCurrentPiecePosition() { return null; }
 
     @Override
-    public void nextPiece(Piece p, Point spawnPosition) {}
+    public void nextPiece(Piece p, Point spawnPosition) {
+        currentPiece = new TetrisPiece(p.getType());
+        currentPosition = spawnPosition;
+        setPosition(p, spawnPosition);
+    }
 
     @Override
     public boolean equals(Object other) { return false; }
@@ -40,10 +61,10 @@ public final class TetrisBoard implements Board {
     public int getRowsCleared() { return -1; }
 
     @Override
-    public int getWidth() { return -1; }
+    public int getWidth() { return width; }
 
     @Override
-    public int getHeight() { return -1; }
+    public int getHeight() { return height; }
 
     @Override
     public int getMaxHeight() { return -1; }
@@ -58,5 +79,19 @@ public final class TetrisBoard implements Board {
     public int getRowWidth(int y) { return -1; }
 
     @Override
-    public Piece.PieceType getGrid(int x, int y) { return null; }
+    public Piece.PieceType getGrid(int x, int y) {
+        return board[y][x];
+    }
+
+    private void setPosition(Piece p, Point position) {
+        Point[] body = p.getBody();
+        for (int i = 0; i < body.length; i++) {
+            board[body[i].y+currentPosition.y][body[i].x+currentPosition.x] = null;
+        }
+        for (int i = 0; i < body.length; i++) {
+            board[body[i].y+position.y][body[i].x+position.x] = p.getType();
+        }
+        currentPosition = position;
+    }
+
 }
