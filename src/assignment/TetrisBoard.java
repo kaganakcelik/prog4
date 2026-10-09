@@ -3,6 +3,8 @@ package assignment;
 import javax.swing.text.Position;
 import java.awt.*;
 
+import static assignment.Board.Action.COUNTERCLOCKWISE;
+
 /**
  * Represents a Tetris board -- essentially a 2-d grid of piece types (or nulls). Supports
  * tetris pieces and row clearing.  Does not do any drawing or have any idea of
@@ -61,6 +63,42 @@ public final class TetrisBoard implements Board {
                 while (setPosition(currentPiece, new Point(currentPosition.x, currentPosition.y - 1))) { }
                 placePiece();
                 lastResult = Result.PLACE;
+                break;
+            case CLOCKWISE:
+                if (currentPiece.getWidth() == 3) {
+                    if (setRotation(currentPiece.clockwisePiece(),
+                            new Point(currentPosition.x, currentPosition.y),
+                            Piece.NORMAL_CLOCKWISE_WALL_KICKS[currentPiece.getRotationIndex()])) {
+                        lastResult = Result.SUCCESS;
+                    }
+                    else lastResult = Result.OUT_BOUNDS;
+                }
+                else if (currentPiece.getWidth() == 4) {
+                    if (setRotation(currentPiece.clockwisePiece(),
+                            new Point(currentPosition.x, currentPosition.y),
+                            Piece.I_CLOCKWISE_WALL_KICKS[currentPiece.getRotationIndex()])) {
+                        lastResult = Result.SUCCESS;
+                    }
+                    else lastResult = Result.OUT_BOUNDS;
+                }
+                break;
+            case COUNTERCLOCKWISE:
+                if (currentPiece.getWidth() == 3) {
+                    if (setRotation(currentPiece.counterclockwisePiece(),
+                            new Point(currentPosition.x, currentPosition.y),
+                            Piece.NORMAL_COUNTERCLOCKWISE_WALL_KICKS[currentPiece.getRotationIndex()])) {
+                        lastResult = Result.SUCCESS;
+                    }
+                    else lastResult = Result.OUT_BOUNDS;
+                }
+                else if (currentPiece.getWidth() == 4) {
+                    if (setRotation(currentPiece.counterclockwisePiece(),
+                            new Point(currentPosition.x, currentPosition.y),
+                            Piece.I_COUNTERCLOCKWISE_WALL_KICKS[currentPiece.getRotationIndex()])) {
+                        lastResult = Result.SUCCESS;
+                    }
+                    else lastResult = Result.OUT_BOUNDS;
+                }
                 break;
             default:
                 lastResult = Result.SUCCESS;
@@ -175,6 +213,37 @@ public final class TetrisBoard implements Board {
 
         // the current piece is no longer in play (it's been placed)
         currentPiece = null;
+    }
+
+    //checks if all Points in the body are valid
+    private boolean setRotation(Piece p, Point position, Point[] wallKicks) {
+        Point[] body = p.getBody();
+        for (int i = 0; i < wallKicks.length; i++) {
+            boolean checkRotation = true;
+            for (int j = 0; j < body.length; j++) {
+
+                // define the absolute x and y coordinates of the piece body
+                int x = body[j].x + position.x + wallKicks[i].x;
+                int y = body[j].y + position.y + wallKicks[i].y;
+
+                // check to make sure the new position isn't out of bounds or where another piece is
+                if (x < 0 || x >= width || y < 0 || y >= height) {
+                    checkRotation = false;
+                    break;
+                }
+                else if (board[y][x] != null) {
+                    checkRotation = false;
+                    break;
+                }
+            }
+            if (checkRotation) {
+                currentPiece = p;
+                currentPosition.x = currentPosition.x + wallKicks[i].x;
+                currentPosition.y = currentPosition.y + wallKicks[i].y;
+                return true;
+            }
+        }
+        return false;
     }
 
 }
