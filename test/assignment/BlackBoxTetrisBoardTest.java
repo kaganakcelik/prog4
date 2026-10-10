@@ -15,7 +15,7 @@ public class BlackBoxTetrisBoardTest {
 
     @Test
     void testSomething() {
-        // change this
+        Board test = new TetrisBoard(3,3);
     }
 
 }

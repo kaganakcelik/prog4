@@ -21,6 +21,8 @@ public final class TetrisBoard implements Board {
     Result lastResult = Result.NO_PIECE;
     Action lastAction = Action.NOTHING;
 
+    int currentHeight = 0;
+
 
     // JTetris will use this constructor
     public TetrisBoard(int width, int height) {
@@ -55,6 +57,7 @@ public final class TetrisBoard implements Board {
                 if (setPosition(currentPiece, new Point(x, y - 1))) lastResult = Result.SUCCESS;
                 else {
                     placePiece();
+                    clearRows();
                     lastResult = Result.PLACE;
                 }
                 break;
@@ -62,6 +65,7 @@ public final class TetrisBoard implements Board {
                 // keep moving down until blocked, then place
                 while (setPosition(currentPiece, new Point(currentPosition.x, currentPosition.y - 1))) { }
                 placePiece();
+                clearRows();
                 lastResult = Result.PLACE;
                 break;
             case CLOCKWISE:
@@ -162,7 +166,7 @@ public final class TetrisBoard implements Board {
     public int getHeight() { return height; }
 
     @Override
-    public int getMaxHeight() { return -1; }
+    public int getMaxHeight() { return currentHeight; }
 
     @Override
     public int dropHeight(Piece piece, int x) { return -1; }
@@ -208,6 +212,7 @@ public final class TetrisBoard implements Board {
 
         // write the body to the board
         for (int i = 0; i < body.length; i++) {
+            currentHeight = Math.max(currentHeight, body[i].y+currentPosition.y + 1);
             board[body[i].y+currentPosition.y][body[i].x+currentPosition.x] = currentPiece.getType();
         }
 
@@ -220,7 +225,7 @@ public final class TetrisBoard implements Board {
         Point[] body = p.getBody();
         for (int i = 0; i < wallKicks.length; i++) {
             boolean checkRotation = true;
-            for (int j = 0; j < body.length; j++) {
+            for (int j = 0; j < body.length && checkRotation; j++) {
 
                 // define the absolute x and y coordinates of the piece body
                 int x = body[j].x + position.x + wallKicks[i].x;
@@ -229,11 +234,9 @@ public final class TetrisBoard implements Board {
                 // check to make sure the new position isn't out of bounds or where another piece is
                 if (x < 0 || x >= width || y < 0 || y >= height) {
                     checkRotation = false;
-                    break;
                 }
                 else if (board[y][x] != null) {
                     checkRotation = false;
-                    break;
                 }
             }
             if (checkRotation) {
@@ -246,4 +249,24 @@ public final class TetrisBoard implements Board {
         return false;
     }
 
+    private void clearRows() {
+        Piece.PieceType[][] newBoard = new Piece.PieceType[height][width];
+        int currentRow = 0;
+        for (int i = 0; i < height ; i++) {
+            boolean cleared = true;
+            for (int j = 0; j < width && cleared; j++) {
+                if (board[i][j] == null) {
+                    cleared = false;
+                }
+            }
+            if (!cleared) {
+                newBoard[currentRow] = board[i];
+                currentRow++;
+            }
+            else {
+                currentHeight--;
+            }
+        }
+        board = newBoard;
+    }
 }
