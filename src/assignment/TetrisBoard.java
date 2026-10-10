@@ -21,6 +21,7 @@ public final class TetrisBoard implements Board {
     Result lastResult = Result.NO_PIECE;
     Action lastAction = Action.NOTHING;
 
+    //max height of the blocks currently
     int currentHeight = 0;
 
 
@@ -44,6 +45,7 @@ public final class TetrisBoard implements Board {
         int x = currentPosition.x;
         int y = currentPosition.y;
 
+        //switch statement between all actions
         switch (act) {
             case LEFT:
                 if (setPosition(currentPiece, new Point(x - 1, y))) lastResult = Result.SUCCESS;
@@ -69,6 +71,8 @@ public final class TetrisBoard implements Board {
                 lastResult = Result.PLACE;
                 break;
             case CLOCKWISE:
+                //checks piece type
+                //runs the rotation function to try and create rotation
                 if (currentPiece.getWidth() == 3) {
                     if (setRotation(currentPiece.clockwisePiece(),
                             new Point(currentPosition.x, currentPosition.y),
@@ -87,6 +91,8 @@ public final class TetrisBoard implements Board {
                 }
                 break;
             case COUNTERCLOCKWISE:
+                //checks piece type
+                //runs the rotation function to try and create rotation
                 if (currentPiece.getWidth() == 3) {
                     if (setRotation(currentPiece.counterclockwisePiece(),
                             new Point(currentPosition.x, currentPosition.y),
@@ -221,6 +227,7 @@ public final class TetrisBoard implements Board {
     }
 
     //checks if all Points in the body are valid
+    //checks and applies wall kicks
     private boolean setRotation(Piece p, Point position, Point[] wallKicks) {
         Point[] body = p.getBody();
         for (int i = 0; i < wallKicks.length; i++) {
@@ -239,6 +246,8 @@ public final class TetrisBoard implements Board {
                     checkRotation = false;
                 }
             }
+
+            //applies rotations if valid
             if (checkRotation) {
                 currentPiece = p;
                 currentPosition.x = currentPosition.x + wallKicks[i].x;
@@ -249,16 +258,23 @@ public final class TetrisBoard implements Board {
         return false;
     }
 
+    //clears rows if row is full
+    //creates a duplicate board and only saves the rows that are not full
     private void clearRows() {
         Piece.PieceType[][] newBoard = new Piece.PieceType[height][width];
         int currentRow = 0;
+
+        //loops through either board
         for (int i = 0; i < height ; i++) {
             boolean cleared = true;
             for (int j = 0; j < width && cleared; j++) {
+                //checks if space is empty
                 if (board[i][j] == null) {
                     cleared = false;
                 }
             }
+
+            //if the row have null spaces, then it copies to the new board
             if (!cleared) {
                 newBoard[currentRow] = board[i];
                 currentRow++;
