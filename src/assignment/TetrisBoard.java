@@ -149,9 +149,45 @@ public final class TetrisBoard implements Board {
         return lastResult;
     }
 
-    // this is not necessary for the TetrisBoard class for this week's submission so left unfinished
+    // makes a full copy of another board so changes to the copy don't affect the original
+    private TetrisBoard(TetrisBoard other) {
+        width = other.width;
+        height = other.height;
+
+        // copy every cell into a new grid
+        board = new Piece.PieceType[height][width];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                board[y][x] = other.board[y][x];
+            }
+        }
+
+        // copy row widths and column heights into new arrays
+        rowWidths = new int[height];
+        for (int y = 0; y < height; y++) rowWidths[y] = other.rowWidths[y];
+
+        columnHeights = new int[width];
+        for (int x = 0; x < width; x++) columnHeights[x] = other.columnHeights[x];
+
+        maxHeight = other.maxHeight;
+        rowsCleared = other.rowsCleared;
+        lastAction = other.lastAction;
+        lastResult = other.lastResult;
+
+        // pieces never change so both boards can share the same one
+        currentPiece = other.currentPiece;
+
+        // position changes so copy needs its own point
+        if (other.currentPosition != null) currentPosition = new Point(other.currentPosition);
+    }
+
+    // returns a copy of the board with the move applied using the new constructor above
     @Override
-    public Board testMove(Action act) { return null; }
+    public Board testMove(Action act) {
+        TetrisBoard copy = new TetrisBoard(this);
+        copy.move(act);
+        return copy;
+    }
 
     @Override
     public Piece getCurrentPiece() { return currentPiece; }
