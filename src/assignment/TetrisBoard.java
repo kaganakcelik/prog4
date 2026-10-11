@@ -2,6 +2,7 @@ package assignment;
 
 import javax.swing.text.Position;
 import java.awt.*;
+import java.util.*;
 
 import static assignment.Board.Action.COUNTERCLOCKWISE;
 
@@ -148,6 +149,7 @@ public final class TetrisBoard implements Board {
         return lastResult;
     }
 
+    // this is not necessary for the TetrisBoard class for this week's submission so left unfinished
     @Override
     public Board testMove(Action act) { return null; }
 
@@ -170,8 +172,32 @@ public final class TetrisBoard implements Board {
         currentPosition = new Point(spawnPosition);
     }
 
+    // two boards are equal when they have the same size, same placed blocks, and same falling piece at same position
     @Override
-    public boolean equals(Object other) { return false; }
+    public boolean equals(Object other) {
+        // same object is equal
+        if (this == other) return true;
+
+        // ignore objects which aren't also tetris boards
+        if (!(other instanceof TetrisBoard)) return false;
+        TetrisBoard otherBoard = (TetrisBoard) other; // cast it to TetrisBoard object
+
+        // boards have to be same size
+        if (width != otherBoard.width || height != otherBoard.height) return false;
+
+        // every cell of the grid has to match
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (board[y][x] != otherBoard.board[y][x]) return false;
+            }
+        }
+
+        // falling pieces have to be same
+        if (!Objects.equals(currentPiece, otherBoard.currentPiece)) return false;
+
+        // if there's a falling piece it has to be at the same position
+        return currentPiece == null || currentPosition.equals(otherBoard.currentPosition);
+    }
 
     @Override
     public Result getLastResult() { return lastResult; }
